@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>難易度並べ替え（楽譜PDF）</title>
+<!-- SortableJS: drag-reorder / PDF.js: render score thumbnails + full view (both from cdnjs) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{ --fg:#1a1a1a; --muted:#666; --line:#d8d8d8; --bg:#fff; --band:#f3f3f1; --focus:#2563eb; }
+  *{ box-sizing:border-box; }
+  body{ font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+        color:var(--fg); background:var(--bg); margin:0; line-height:1.6; }
+  .wrap{ max-width:760px; margin:0 auto; padding:20px 16px 96px; }
+  h1{ font-size:19px; margin:0 0 4px; }
+  .lead{ color:var(--muted); font-size:14px; margin:0 0 16px; }
+  .ends{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted);
+         border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:6px 4px; margin-bottom:8px; }
+  ul#list{ list-style:none; margin:0; padding:0; }
+  li.card{ display:grid; grid-template-columns:34px 92px 1fr; gap:12px; align-items:center;
+           border:1px solid var(--line); border-radius:8px; background:var(--bg);
+           padding:10px; margin:8px 0; cursor:grab; }
+  li.card:focus-within{ outline:2px solid var(--focus); outline-offset:1px; }
+  li.card.dragging{ opacity:.5; }
+  .rank{ font-variant-numeric:tabular-nums; font-weight:700; font-size:16px; text-align:center; color:var(--muted); }
+  .thumb{ width:92px; height:120px; background:var(--band); border:1px solid var(--line); border-radius:4px;
+          display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:zoom-in; }
+  .thumb canvas,.thumb img{ max-width:100%; max-height:100%; display:block; }
+  .thumb .ph{ font-size:12px; color:var(--muted); padding:6px; text-align:center; }
+  .meta .label{ font-weight:600; font-size:15px; }
+  .meta .open{ font-size:12px; color:var(--focus); background:none; border:none; padding:2px 0; cursor:pointer; }
+  .rate{ margin-top:6px; }
+  .rate label{ font-size:12px; color:var(--muted); }
+  .rate input[type=range]{ width:100%; }
+  .rate .val{ font-variant-numeric:tabular-nums; font-size:12px; color:var(--fg); }
+  .bar{ position:fixed; left:0; right:0; bottom:0; background:var(--bg); border-top:1px solid var(--line);
+        padding:10px 16px; display:flex; gap:12px; align-items:center; justify-content:center; }
+  button.primary{ font-size:15px; padding:10px 20px; border:1px solid var(--fg); border-radius:6px;
+                  background:var(--fg); color:#fff; cursor:pointer; }
+  button.primary:disabled{ opacity:.4; cursor:not-allowed; }
+  .hint{ font-size:12px; color:var(--muted); }
+  /* modal full-score viewer */
+  .modal{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; z-index:50; }
+  .modal.open{ display:block; }
+  .sheet{ position:absolute; inset:4% 50% 4% 50%; transform:translateX(-50%); width:min(760px,92vw);
+          background:#fff; border-radius:8px; overflow:auto; padding:16px; }
+  .sheet h2{ font-size:15px; margin:0 0 10px; position:sticky; top:0; background:#fff; }
+  .sheet canvas{ width:100%; border:1px solid var(--line); margin-bottom:10px; }
+  .close{ position:absolute; top:10px; right:14px; font-size:14px; background:none; border:none; cursor:pointer; }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none!important; } }
+  #out{ width:100%; height:120px; font-family:monospace; font-size:12px; margin-top:12px; display:none; }
+  .note{ font-size:12px; color:var(--muted); background:var(--band); border-radius:6px; padding:10px; margin-top:16px; }
+  .participant-box{ border:1px solid var(--line); border-radius:8px; padding:12px; margin:12px 0; background:var(--band); }
+  .participant-box label{ display:block; font-size:14px; margin-bottom:6px; }
+  .participant-box input{ width:100%; font-size:16px; padding:9px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  .pid-note{ font-size:11px; color:var(--muted); margin-top:4px; }
+  .status{ font-size:12px; min-width:8em; text-align:center; }
+  .status.error{ color:#b91c1c; }
+  .status.ok{ color:#166534; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>この曲集の10曲を、難易度の順に並べ替えてください</h1>
+  <p class="lead">上が最も易しく、下にいくほど難しくなるように、カードをドラッグして並べ替えます。各曲を一度弾いてから、下のスライダーで難易度（0–100）も入力してください。楽譜の全体はサムネイルをクリックすると開きます。</p>
+
+  <div class="participant-box">
+    <label for="participantId"><strong>参加者ID</strong></label>
+    <input id="participantId" type="text" autocomplete="off" maxlength="80"
+           placeholder="配布されたIDを入力してください">
+    <div class="pid-note">氏名やメールアドレスは入力しないでください。</div>
+  </div>
+
+  <div class="ends"><span>↑ 最も易しい</span><span>最も難しい ↓</span></div>
+  <ul id="list" aria-label="難易度で並べ替える楽譜のリスト"></ul>
+
+  <div class="note">
+    デスクトップ／タブレットでの利用を推奨します（スマートフォンではドラッグ操作が難しい場合があります）。<br>
+    ※導入時の注意：楽譜PDFは調査本体と<strong>同一オリジン</strong>（同じサーバ）に置いてください。別ドメイン（例: 外部の楽譜サイト）だとCORSでサムネイルが表示できないことがあります。読み込めない曲はラベルのみのカードになりますが、並べ替えと評価は可能です。
+  </div>
+  <textarea id="out" readonly aria-label="回答データ"></textarea>
+</div>
+
+<div class="bar">
+  <span class="hint" id="hint">参加者IDと、10曲すべての難易度を入力してください</span><span class="status" id="saveStatus"></span>
+  <button class="primary" id="submit" disabled>回答を確定</button>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="楽譜">
+  <div class="sheet">
+    <button class="close" id="close">閉じる ✕</button>
+    <h2 id="sheetTitle"></h2>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — ここだけ編集すればそのまま使えます
+   items: 1曲 = {id, label, pdf}。pdf は同一オリジンのURL（空なら placeholder）
+   ============================================================ */
+const CONFIG = {
+  studyId: "guitar_difficulty_2026",
+  // Google Apps Scriptを「ウェブアプリ」としてデプロイした後、/exec で終わるURLを貼る
+  endpointUrl: "https://script.google.com/macros/s/AKfycbwXDUl5NykDwOPti0NFqSNc1IZRjMl3WhUpAjgcISPE_YVJQnkRy1WDmwc9A9AlEmWrvw/exec",
+  collectionId: "carcassi_op60",              // 曲集の識別子（データに記録）
+  requireRatings: true,                        // 全曲スライダー入力を確定条件にする
+  items: [
+    { id:"c1",  label:"Etude A", pdf:"pdf/car-25-1.pdf" },
+    { id:"c2",  label:"Etude B", pdf:"pdf/car-25-2.pdf" },
+    { id:"c3",  label:"Etude C", pdf:"pdf/car-25-3.pdf" },
+    { id:"c4",  label:"Etude D", pdf:"" },
+    { id:"c5",  label:"Etude E", pdf:"" },
+    { id:"c6",  label:"Etude F", pdf:"" },
+    { id:"c7",  label:"Etude G", pdf:"" },
+    { id:"c8",  label:"Etude H", pdf:"" },
+    { id:"c9",  label:"Etude I", pdf:"" },
+    { id:"c10", label:"Etude J", pdf:"" }
+  ]
+};
+/* ============================================================ */
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+const startedAt = Date.now();
+const ratings = {};                 // id -> 0..100
+const pdfCache = {};                // id -> pdf doc (lazy)
+
+// Fisher–Yates shuffle for the presented order (order-bias control)
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const presented = shuffle(CONFIG.items);
+const presentedOrder = presented.map(x=>x.id);
+
+const list = document.getElementById("list");
+
+presented.forEach(item=>{
+  const li = document.createElement("li");
+  li.className = "card"; li.dataset.id = item.id; li.tabIndex = 0;
+  li.innerHTML = `
+    <div class="rank" aria-hidden="true"></div>
+    <div class="thumb" data-id="${item.id}" role="button" tabindex="0" aria-label="${item.label} の楽譜を開く">
+      <span class="ph">${item.label}</span>
+    </div>
+    <div class="meta">
+      <div class="label">${item.label}</div>
+      <button class="open" data-id="${item.id}">楽譜を開く</button>
+      <div class="rate">
+        <label>難易度 <span class="val" id="v_${item.id}">—</span> / 100</label>
+        <input type="range" min="0" max="100" step="1" value="50"
+               aria-label="${item.label} の難易度" data-id="${item.id}" data-touched="0">
+      </div>
+    </div>`;
+  list.appendChild(li);
+  if (item.pdf) renderThumb(item);
+});
+
+// slider handling
+list.addEventListener("input", e=>{
+  const r = e.target.closest('input[type=range]'); if(!r) return;
+  const id = r.dataset.id; r.dataset.touched = "1"; ratings[id] = +r.value;
+  document.getElementById("v_"+id).textContent = r.value;
+  refreshSubmit();
+});
+
+// open full score
+function openViewer(id){
+  const item = CONFIG.items.find(x=>x.id===id);
+  document.getElementById("sheetTitle").textContent = item.label;
+  const body = document.getElementById("sheetBody"); body.innerHTML = "読み込み中…";
+  document.getElementById("modal").classList.add("open");
+  if(!item.pdf){ body.innerHTML = '<p class="ph">この曲の楽譜PDFは未設定です（CONFIG.items の pdf を指定してください）。</p>'; return; }
+  loadPdf(item).then(pdf=>renderAllPages(pdf, body)).catch(()=>{ body.innerHTML = '<p class="ph">楽譜を読み込めませんでした（URL／CORSを確認してください）。</p>'; });
+}
+list.addEventListener("click", e=>{
+  const t = e.target.closest('.open,.thumb'); if(!t) return;
+  openViewer(t.dataset.id);
+});
+list.addEventListener("keydown", e=>{
+  if((e.key==="Enter"||e.key===" ") && e.target.classList.contains("thumb")){ e.preventDefault(); openViewer(e.target.dataset.id); }
+});
+document.getElementById("close").onclick = ()=>document.getElementById("modal").classList.remove("open");
+document.getElementById("modal").addEventListener("click", e=>{ if(e.target.id==="modal") e.currentTarget.classList.remove("open"); });
+
+// PDF helpers
+function loadPdf(item){
+  if(pdfCache[item.id]) return Promise.resolve(pdfCache[item.id]);
+  return pdfjsLib.getDocument(item.pdf).promise.then(pdf=>{ pdfCache[item.id]=pdf; return pdf; });
+}
+function renderThumb(item){
+  loadPdf(item).then(pdf=>pdf.getPage(1)).then(page=>{
+    const box = document.querySelector(`.thumb[data-id="${item.id}"]`); if(!box) return;
+    const vp0 = page.getViewport({scale:1});
+    const scale = 92 / vp0.width;
+    const vp = page.getViewport({scale});
+    const c = document.createElement("canvas"); c.width=vp.width; c.height=vp.height;
+    page.render({canvasContext:c.getContext("2d"), viewport:vp}).promise.then(()=>{ box.innerHTML=""; box.appendChild(c); });
+  }).catch(()=>{/* keep placeholder label */});
+}
+function renderAllPages(pdf, container){
+  container.innerHTML = "";
+  const width = Math.min(container.clientWidth || 680, 720);
+  const seq = Promise.resolve();
+  let chain = seq;
+  for(let n=1; n<=pdf.numPages; n++){
+    chain = chain.then(()=>pdf.getPage(n)).then(page=>{
+      const vp0 = page.getViewport({scale:1});
+      const vp = page.getViewport({scale: width/vp0.width});
+      const c = document.createElement("canvas"); c.width=vp.width; c.height=vp.height;
+      container.appendChild(c);
+      return page.render({canvasContext:c.getContext("2d"), viewport:vp}).promise;
+    });
+  }
+  return chain;
+}
+
+// drag-reorder
+new Sortable(list, {
+  animation:120, ghostClass:"dragging",
+  onStart:()=>{}, onEnd:updateRanks
+});
+function updateRanks(){
+  [...list.children].forEach((li,i)=>{ li.querySelector(".rank").textContent = (i+1); });
+}
+updateRanks();
+
+// participant ID
+document.getElementById("participantId").addEventListener("input", refreshSubmit);
+
+// submit
+function currentOrder(){ return [...list.children].map(li=>li.dataset.id); }
+function allRated(){ return CONFIG.items.every(it=>ratings.hasOwnProperty(it.id)); }
+function refreshSubmit(){
+  const participantId = document.getElementById("participantId").value.trim();
+  const ratedOK = !CONFIG.requireRatings || allRated();
+  const ok = participantId.length > 0 && ratedOK;
+  document.getElementById("submit").disabled = !ok;
+  const remain = CONFIG.items.length - Object.keys(ratings).length;
+  document.getElementById("hint").textContent = ok ? "確定できます" :
+    (!participantId ? "参加者IDを入力してください" :
+    `難易度スライダー：残り ${remain} 曲`);
+}
+document.getElementById("submit").onclick = async ()=>{
+  const button = document.getElementById("submit");
+  const status = document.getElementById("saveStatus");
+  const participantId = document.getElementById("participantId").value.trim();
+
+  const result = {
+    studyId: CONFIG.studyId,
+    participantId,
+    collection: CONFIG.collectionId,
+    presentedOrder,
+    rankedOrder: currentOrder(),
+    ratings,
+    durationMs: Date.now() - startedAt,
+    ts: new Date().toISOString(),
+    userAgent: navigator.userAgent
+  };
+
+  const json = JSON.stringify(result);
+  button.disabled = true;
+  button.textContent = "送信中…";
+  status.className = "status";
+  status.textContent = "";
+
+  try {
+    if (!CONFIG.endpointUrl || CONFIG.endpointUrl.includes("PASTE_YOUR")) {
+      throw new Error("Google Apps ScriptのURLが未設定です");
+    }
+
+    // Apps Scriptへのクロスオリジン送信。no-corsのためレスポンス本文は読めません。
+    await fetch(CONFIG.endpointUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: json,
+      keepalive: true
+    });
+
+    localStorage.setItem("lastRankingResult", json);
+    status.className = "status ok";
+    status.textContent = "送信しました";
+    button.textContent = "回答済み";
+    document.getElementById("hint").textContent = "ご協力ありがとうございました";
+  } catch (err) {
+    localStorage.setItem("unsentRankingResult", json);
+    status.className = "status error";
+    status.textContent = "送信できませんでした";
+    button.disabled = false;
+    button.textContent = "もう一度送信";
+    document.getElementById("hint").textContent = err.message || "通信環境を確認してください";
+
+    // 調査者による回収用に、回答JSONも画面下へ表示
+    const out = document.getElementById("out");
+    out.style.display = "block";
+    out.value = JSON.stringify(result, null, 2);
+  }
+};
+
+refreshSubmit();
+</script>
+
+
+</body>
+</html>
