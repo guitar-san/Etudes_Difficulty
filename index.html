@@ -1,226 +1,50 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>クラシックギター楽譜 難易度評価調査</title>
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>クラシックギター楽譜の難易度評価調査</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-:root{--fg:#1f2937;--muted:#6b7280;--line:#d1d5db;--bg:#f7f7f5;--panel:#fff;--accent:#1d4ed8;--ok:#166534;--bad:#b91c1c}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;line-height:1.6}
-main{max-width:920px;margin:auto;padding:24px 16px 100px}.page{display:none}.page.active{display:block}
-h1{font-size:24px;margin:0 0 8px}h2{font-size:20px;margin:0 0 12px}h3{font-size:16px;margin:22px 0 8px}
-.lead,.small{color:var(--muted)}.small{font-size:12px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin:14px 0}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
-input,select,textarea{width:100%;font:inherit;padding:9px;border:1px solid var(--line);border-radius:6px;background:#fff}textarea{min-height:76px;resize:vertical}
-.checkline{display:flex;gap:8px;align-items:flex-start;margin:8px 0}.checkline input{width:auto;margin-top:5px}
-.progress{font-size:13px;color:var(--muted);margin-bottom:12px}.rangebox{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
-.rangebox .sep{padding-bottom:9px}.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 4px;margin:12px 0 8px}
-.score-list{list-style:none;padding:0;margin:0}.card{display:grid;grid-template-columns:34px 100px minmax(0,1fr);gap:12px;align-items:start;border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px;margin:8px 0;cursor:grab}
-.rank{font-weight:700;text-align:center;color:var(--muted);padding-top:42px}.thumb{width:100px;height:128px;background:#f3f4f6;border:1px solid var(--line);border-radius:5px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in}
-.thumb canvas{max-width:100%;max-height:100%}.meta .title{font-weight:700}.open{border:0;background:none;color:var(--accent);padding:2px 0;cursor:pointer}
-.tags{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}.tags label{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 7px;background:#fafafa}.tags input{width:auto}
-.comment{min-height:56px;font-size:13px}.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:10px 16px;display:flex;justify-content:center;gap:12px;z-index:20}
-button{font:inherit;border-radius:7px;padding:10px 18px;cursor:pointer}.primary{background:#111827;color:#fff;border:1px solid #111827}.secondary{background:#fff;color:#111827;border:1px solid var(--line)}button:disabled{opacity:.45;cursor:not-allowed}
-.status{font-size:13px;text-align:center}.ok{color:var(--ok)}.error{color:var(--bad)}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:50}.modal.open{display:block}.sheet{position:absolute;inset:3% 50% 3% 50%;transform:translateX(-50%);width:min(820px,94vw);background:#fff;border-radius:10px;overflow:auto;padding:18px}
-.sheet canvas{width:100%;border:1px solid var(--line);margin-bottom:10px}.close{position:sticky;top:0;float:right;background:#fff;border:1px solid var(--line)}
-.download{display:inline-block;padding:11px 16px;border-radius:7px;background:#e8eefc;color:#143d8d;text-decoration:none;font-weight:700}
-.notice{background:#fff8db;border:1px solid #eadc98;border-radius:8px;padding:12px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}.card{grid-template-columns:28px 78px 1fr}.thumb{width:78px;height:105px}.rank{padding-top:32px}.rangebox{grid-template-columns:1fr}.rangebox .sep{display:none}}
-</style>
-</head>
-<body>
-<main>
-<section class="page active" data-page="0">
-  <h1>クラシックギター楽譜の難易度評価調査</h1>
-  <p class="lead">属性入力の後、4つの版について、それぞれ10曲を易しい順から難しい順へ並べ替えていただきます。</p>
-  <div class="panel">
-    <h2>研究参加への同意</h2>
-    <p>研究の説明を読み、内容を理解した上で参加してください。回答は研究目的で利用します。途中で回答を中止できます。</p>
-    <label class="checkline"><input id="consent" type="checkbox"><span>説明内容を理解し、本研究への参加に同意します。</span></label>
-  </div>
-</section>
-
-<section class="page" data-page="1">
-  <div class="progress">属性入力</div>
-  <h2>協力者情報</h2>
-  <div class="panel grid">
-    <div class="field"><label>氏名 *</label><input id="name" autocomplete="name"></div>
-    <div class="field"><label>メールアドレス *</label><input id="email" type="email" autocomplete="email"></div>
-    <div class="field"><label>年代 *</label><select id="ageBand"><option value="">選択してください</option><option>10代</option><option>20代</option><option>30代</option><option>40代</option><option>50代</option><option>60代</option><option>70代以上</option></select></div>
-    <div class="field"><label>現在の立場 *</label><select id="role"><option value="">選択してください</option><option>学習者</option><option>音楽大学・専門課程の学生</option><option>演奏家</option><option>指導者</option><option>演奏家・指導者</option><option>その他</option></select></div>
-    <div class="field"><label>音楽歴（年） *</label><input id="musicYears" type="number" min="0" max="100" step="0.5"></div>
-    <div class="field"><label>ギター歴（年） *</label><input id="guitarYears" type="number" min="0" max="100" step="0.5"></div>
-    <div class="field"><label>クラシックギター歴（年）</label><input id="classicalYears" type="number" min="0" max="100" step="0.5"></div>
-    <div class="field"><label>ギター指導歴（年）</label><input id="teachingYears" type="number" min="0" max="100" step="0.5"></div>
-    <div class="field"><label>自己評価する演奏レベル *</label><select id="level"><option value="">選択してください</option><option>初級</option><option>中級</option><option>上級</option><option>専門家</option></select></div>
-    <div class="field"><label>主な活動・所属など（任意）</label><input id="affiliation"></div>
-  </div>
-  <div class="notice small">氏名・メールアドレスなどの個人情報は、分析用の評価データとは分けたシートに保存します。</div>
-</section>
-
-<section class="page" data-page="2"><div id="editionHost1"></div></section>
-<section class="page" data-page="3"><div id="editionHost2"></div></section>
-<section class="page" data-page="4"><div id="editionHost3"></div></section>
-<section class="page" data-page="5"><div id="editionHost4"></div></section>
-
-<section class="page" data-page="6">
-  <div class="progress">評価完了</div>
-  <h2>謝金支払い書類</h2>
-  <div class="panel">
-    <p>以下のExcelファイルをダウンロードし、必要事項を記入してください。その後、記入済みファイルをこのページからアップロードしてください。</p>
-    <p><a class="download" href="transfer.xlsx" download>支払い用Excelをダウンロード</a></p>
-    <div class="field">
-      <label>記入済みExcelファイル（.xlsx） *</label>
-      <input id="paymentFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-    </div>
-    <p class="small">アップロードされたファイルはGoogle Driveの支払い書類用フォルダへ保存されます。分析用回答とは別に管理してください。</p>
-  </div>
-  <div id="finalStatus" class="status"></div>
-</section>
-</main>
-
-<div class="nav">
-  <button id="back" class="secondary" type="button" style="display:none">戻る</button>
-  <button id="next" class="primary" type="button">次へ</button>
-</div>
-
-<div class="modal" id="modal"><div class="sheet"><button class="close" id="closeModal">閉じる ✕</button><h3 id="modalTitle"></h3><div id="modalBody"></div></div></div>
-
+:root{--fg:#20242c;--muted:#667085;--line:#d0d5dd;--bg:#f5f6f7;--panel:#fff;--accent:#174ea6;--bad:#b42318;--ok:#067647}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;line-height:1.55}
+main{max-width:1260px;margin:auto;padding:24px 18px 110px}.page{display:none}.page.active{display:block}h1{font-size:25px;margin:0 0 8px}h2{font-size:21px;margin:0 0 10px}h3{font-size:16px}.lead,.small{color:var(--muted)}.small{font-size:12px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:11px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;font-size:14px;font-weight:650;margin-bottom:5px}input,select,textarea{font:inherit;width:100%;border:1px solid var(--line);border-radius:7px;padding:9px;background:#fff}textarea{resize:vertical}.checkline{display:flex;gap:8px;align-items:flex-start}.checkline input,.choice input{width:auto;margin-top:5px}.choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.choice{display:flex;gap:6px;align-items:flex-start;border:1px solid var(--line);border-radius:7px;padding:7px;background:#fafafa;font-size:13px}
+.pdf-frame{width:100%;height:68vh;border:1px solid var(--line);border-radius:8px}.progress{font-size:13px;color:var(--muted);margin-bottom:8px}.order-label{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin:8px 3px}.score-list{display:flex;gap:13px;overflow-x:auto;list-style:none;margin:0;padding:12px;background:#e9ecef;border:1px solid var(--line);border-radius:11px;min-height:715px;scroll-snap-type:x proximity}.card{flex:0 0 310px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;display:flex;flex-direction:column;scroll-snap-align:start;cursor:grab}.card.dragging{opacity:.5}.card-head{display:flex;align-items:center;justify-content:space-between;gap:6px}.rank{font-weight:700}.move-tools{display:flex;gap:4px;align-items:center}.move-tools select{width:91px;padding:5px}.mini{padding:5px 8px;border:1px solid var(--line);background:#fff;border-radius:6px}.thumb{height:330px;border:1px solid var(--line);border-radius:6px;background:#f2f4f7;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:9px 0;cursor:zoom-in}.thumb canvas{max-width:100%;max-height:100%}.piece-title{font-weight:700}.open{border:0;background:none;color:var(--accent);padding:3px 0;text-align:left;cursor:pointer}.factor-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:7px 0}.factor-grid .choice{padding:4px 6px;font-size:12px}.comment{min-height:85px;margin-top:5px}.required-note{font-size:11px;color:var(--bad)}.range-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}.range-grid .sep{padding-bottom:10px}.notice{background:#fffaeb;border:1px solid #fedf89;border-radius:8px;padding:11px}.nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:11px;display:flex;justify-content:center;gap:11px;z-index:30}button{font:inherit;padding:10px 18px;border-radius:7px;cursor:pointer}.primary{color:#fff;background:#101828;border:1px solid #101828}.secondary{background:#fff;border:1px solid var(--line)}button:disabled{opacity:.45;cursor:not-allowed}.status{text-align:center;font-size:13px}.status.ok{color:var(--ok)}.status.error{color:var(--bad)}.download{display:inline-block;background:#e8f0fe;color:#174ea6;padding:11px 16px;border-radius:7px;text-decoration:none;font-weight:700}.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:60}.modal.open{display:block}.sheet{position:absolute;inset:3% 50%;transform:translateX(-50%);width:min(920px,96vw);background:#fff;border-radius:10px;overflow:auto;padding:18px}.sheet canvas{width:100%;border:1px solid var(--line);margin-bottom:10px}.close{position:sticky;top:0;float:right;background:#fff;border:1px solid var(--line)}
+@media(max-width:720px){.grid,.choice-grid{grid-template-columns:1fr}.card{flex-basis:88vw}.range-grid{grid-template-columns:1fr}.range-grid .sep{display:none}}
+</style></head><body><main>
+<section class="page active" data-page="0"><h1>クラシックギター楽譜の難易度評価調査</h1><p class="lead">説明書を読み、同意した上で調査を開始してください。</p><div class="panel"><h2>研究説明書</h2><object class="pdf-frame" data="instructions.pdf" type="application/pdf"><p><a href="instructions.pdf" target="_blank">説明書PDFを開く</a></p></object></div><div class="panel"><label class="checkline"><input id="consent" type="checkbox"><span>研究説明書の内容を理解し、本研究への参加に同意します。</span></label></div></section>
+<section class="page" data-page="1"><div class="progress">属性入力</div><h2>協力者情報</h2><div class="panel grid">
+<div class="field"><label>氏名 *</label><input id="name" autocomplete="name"></div><div class="field"><label>メールアドレス *</label><input id="email" type="email" autocomplete="email"></div>
+<div class="field"><label>年代 *</label><select id="ageBand"><option value="">選択</option><option>10代</option><option>20代</option><option>30代</option><option>40代</option><option>50代</option><option>60代</option><option>70代以上</option></select></div>
+<div class="field"><label>自己評価する演奏レベル *</label><select id="level"><option value="">選択</option><option>初級</option><option>中級</option><option>上級</option><option>専門家</option></select></div>
+<div class="field"><label>音楽演奏歴（年） *</label><input id="musicYears" type="number" min="0" max="100" step="0.5"><div class="small">歌唱・他楽器を含め、継続して音楽を演奏してきた期間です。</div></div>
+<div class="field"><label>クラシックギター演奏歴（年） *</label><input id="guitarYears" type="number" min="0" max="100" step="0.5"><div class="small">クラシックギターを継続して演奏・学習してきた期間です。</div></div>
+<div class="field"><label>クラシックギター指導歴（年）</label><input id="teachingYears" type="number" min="0" max="100" step="0.5"></div><div class="field"><label>主な活動・所属など（任意）</label><input id="affiliation"></div></div>
+<div class="panel"><h3>現在の立場（複数選択可） *</h3><div id="roles" class="choice-grid"><label class="choice"><input type="checkbox" value="学習者">学習者</label><label class="choice"><input type="checkbox" value="音楽大学・専門課程の学生">音楽大学・専門課程の学生</label><label class="choice"><input type="checkbox" value="演奏家">演奏家</label><label class="choice"><input type="checkbox" value="指導者">指導者</label><label class="choice"><input type="checkbox" value="研究者">研究者</label><label class="choice"><input type="checkbox" value="その他">その他</label></div></div><div class="notice small">個人情報は分析用評価データとは別シートへ保存します。</div></section>
+<section class="page" data-page="2"><div id="host1"></div></section><section class="page" data-page="3"><div id="host2"></div></section><section class="page" data-page="4"><div id="host3"></div></section><section class="page" data-page="5"><div id="host4"></div></section>
+<section class="page" data-page="6"><div class="progress">評価完了</div><h2>謝金支払い書類</h2><div class="panel"><p>大学指定のExcelをダウンロードして記入後、記入済みファイルをアップロードしてください。</p><p><a id="paymentDownload" class="download" target="_blank" rel="noopener">支払い用Excelをダウンロード</a></p><div class="field"><label>記入済みExcel（.xlsx） *</label><input id="paymentFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></div><p class="small">元の様式はGitHubには置かず、Google DriveからApps Script経由で配布します。</p></div><div id="finalStatus" class="status"></div></section>
+</main><div class="nav"><button id="back" class="secondary" style="display:none">戻る</button><button id="next" class="primary">次へ</button></div>
+<div id="modal" class="modal"><div class="sheet"><button id="closeModal" class="close">閉じる</button><h3 id="modalTitle"></h3><div id="modalBody"></div></div></div>
 <script>
-const CONFIG = {
-  endpointUrl: "https://script.google.com/macros/s/AKfycbwXDUl5NykDwOPti0NFqSNc1IZRjMl3WhUpAjgcISPE_YVJQnkRy1WDmwc9A9AlEmWrvw/exec",
-  studyId: "guitar_difficulty_2026",
-  editions: [
-    {id:"edition1", label:"第1版", folder:"pdf/edition1"},
-    {id:"edition2", label:"第2版", folder:"pdf/edition2"},
-    {id:"edition3", label:"第3版", folder:"pdf/edition3"},
-    {id:"edition4", label:"第4版", folder:"pdf/edition4"}
-  ],
-  pieces: [
-    {id:"p01", label:"Etude No. 1", file:"01.pdf"},
-    {id:"p02", label:"Etude No. 2", file:"02.pdf"},
-    {id:"p03", label:"Etude No. 3", file:"03.pdf"},
-    {id:"p04", label:"Etude No. 4", file:"04.pdf"},
-    {id:"p05", label:"Etude No. 5", file:"05.pdf"},
-    {id:"p06", label:"Etude No. 6", file:"06.pdf"},
-    {id:"p07", label:"Etude No. 7", file:"07.pdf"},
-    {id:"p08", label:"Etude No. 8", file:"08.pdf"},
-    {id:"p09", label:"Etude No. 9", file:"09.pdf"},
-    {id:"p10", label:"Etude No. 10", file:"10.pdf"}
-  ]
-};
+const CONFIG={endpointUrl:"https://script.google.com/macros/s/AKfycbwXDUl5NykDwOPti0NFqSNc1IZRjMl3WhUpAjgcISPE_YVJQnkRy1WDmwc9A9AlEmWrvw/exec",studyId:"guitar_difficulty_2026",editions:[{id:"edition1",label:"第1版",folder:"pdf/edition1"},{id:"edition2",label:"第2版",folder:"pdf/edition2"},{id:"edition3",label:"第3版",folder:"pdf/edition3"},{id:"edition4",label:"第4版",folder:"pdf/edition4"}],pieces:Array.from({length:10},(_,i)=>({id:`p${String(i+1).padStart(2,"0")}`,label:`Etude No. ${i+1}`,file:`${String(i+1).padStart(2,"0")}.pdf`}))};
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-const tags=["セーハ","左手の跳躍","ストレッチ","運指","ポジション移動","アルペジオ","右手","テンポ","リズム","音楽表現","その他"];
-const state={page:0,participantId:crypto.randomUUID?crypto.randomUUID():("P"+Date.now()),startedAt:Date.now(),editionOrder:[],editions:{}};
-const pdfCache={};
-
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a}
-state.editionOrder=shuffle(CONFIG.editions.map(e=>e.id));
-
-function editionByPosition(pos){return CONFIG.editions.find(e=>e.id===state.editionOrder[pos])}
-function renderEdition(pos){
-  const ed=editionByPosition(pos);
-  const host=document.getElementById("editionHost"+(pos+1));
-  const presented=shuffle(CONFIG.pieces);
-  state.editions[ed.id]={presentedOrder:presented.map(x=>x.id),startedAt:Date.now()};
-  host.innerHTML=`<div class="progress">版 ${pos+1} / 4</div>
-  <h2>${ed.label}：10曲の難易度評価</h2>
-  <p class="lead">この版の10曲を、あなたにとって易しい順から難しい順へ並べ替えてください。各曲について、難しいと感じる点があれば簡潔に記入してください。</p>
-  <div class="panel">
-    <h3>この版に含まれる10曲の難易度範囲</h3>
-    <p class="small">0＝ごく易しい、100＝極めて難しいとして、この10曲の中で最も易しい曲と最も難しい曲のおおよその位置を指定してください。</p>
-    <div class="rangebox">
-      <div class="field"><label>最も易しい曲のおおよその難易度（0–100）</label><input class="range-min" type="number" min="0" max="100" step="1" placeholder="例：20"></div>
-      <div class="sep">〜</div>
-      <div class="field"><label>最も難しい曲のおおよその難易度（0–100）</label><input class="range-max" type="number" min="0" max="100" step="1" placeholder="例：80"></div>
-    </div>
-  </div>
-  <div class="ends"><span>↑ 最も易しい</span><span>最も難しい ↓</span></div>
-  <ul class="score-list" data-edition="${ed.id}"></ul>
-  <div class="panel field"><label>この版全体についての補足コメント（任意）</label><textarea class="edition-comment"></textarea></div>`;
-  const list=host.querySelector(".score-list");
-  presented.forEach(piece=>{
-    const pdf=`${ed.folder}/${piece.file}`;
-    const li=document.createElement("li");li.className="card";li.dataset.id=piece.id;
-    li.innerHTML=`<div class="rank"></div><div class="thumb" data-pdf="${pdf}" data-title="${ed.label} ${piece.label}"><span class="small">${piece.label}</span></div>
-    <div class="meta"><div class="title">${piece.label}</div><button class="open" type="button" data-pdf="${pdf}" data-title="${ed.label} ${piece.label}">楽譜を開く</button>
-    <div class="tags">${tags.map(t=>`<label><input type="checkbox" value="${t}"> ${t}</label>`).join("")}</div>
-    <textarea class="comment" placeholder="何が難しいか、特に注目した点など（任意）"></textarea></div>`;
-    list.appendChild(li);renderThumb(li.querySelector(".thumb"),pdf);
-  });
-  new Sortable(list,{animation:120,onEnd:()=>updateRanks(list)});updateRanks(list);
-}
+const FACTORS=["セーハ","左手の跳躍","ストレッチ","運指","ポジション移動","アルペジオ","右手","テンポ","リズム","音楽表現","特になし","その他"];
+const state={page:0,participantId:(crypto.randomUUID?crypto.randomUUID():`P${Date.now()}`),startedAt:Date.now(),editionOrder:[],editions:{}};const cache={};
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}state.editionOrder=shuffle(CONFIG.editions.map(x=>x.id));
+function edAt(pos){return CONFIG.editions.find(x=>x.id===state.editionOrder[pos])}
+function renderEdition(pos){const ed=edAt(pos),host=document.getElementById(`host${pos+1}`),shown=shuffle(CONFIG.pieces);state.editions[ed.id]={presentedOrder:shown.map(x=>x.id),startedAt:Date.now()};host.innerHTML=`<div class="progress">版 ${pos+1} / 4</div><h2>${ed.label}：10曲の難易度評価</h2><p class="lead">カードを左右へドラッグしてください。離れた場所へは「○位へ」を使えます。</p><div class="order-label"><span>← 最も易しい</span><span>最も難しい →</span></div><ul class="score-list"></ul><div class="panel"><h3>順位付け後：この版の難易度範囲</h3><p class="small">0＝ごく易しい、100＝極めて難しいとして入力してください。</p><div class="range-grid"><div class="field"><label>最も易しい曲（0–100） *</label><input class="rangeMin" type="number" min="0" max="100"></div><div class="sep">〜</div><div class="field"><label>最も難しい曲（0–100） *</label><input class="rangeMax" type="number" min="0" max="100"></div></div></div><div class="panel field"><label>版全体の補足コメント（任意）</label><textarea class="editionComment"></textarea></div>`;const list=host.querySelector(".score-list");shown.forEach(piece=>{const url=`${ed.folder}/${piece.file}`,li=document.createElement("li");li.className="card";li.dataset.id=piece.id;li.innerHTML=`<div class="card-head"><span class="rank"></span><span class="move-tools"><button type="button" class="mini left">←</button><select class="position"></select><button type="button" class="mini right">→</button></span></div><div class="thumb" data-url="${url}" data-title="${ed.label} ${piece.label}"><span class="small">${piece.label}</span></div><div class="piece-title">${piece.label}</div><button type="button" class="open" data-url="${url}" data-title="${ed.label} ${piece.label}">楽譜を大きく開く</button><div class="small"><b>難しい要因 *</b></div><div class="factor-grid">${FACTORS.map(f=>`<label class="choice"><input type="checkbox" value="${f}">${f}</label>`).join("")}</div><div class="small"><b>判断理由・コメント *</b></div><textarea class="comment" placeholder="この順位にした理由や注目した点"></textarea><div class="required-note">要因を1つ以上選び、コメントを入力してください。</div>`;list.appendChild(li);thumb(li.querySelector(".thumb"),url)});new Sortable(list,{animation:120,direction:"horizontal",ghostClass:"dragging",onEnd:()=>ranks(list)});list.addEventListener("click",e=>{const li=e.target.closest(".card");if(!li)return;if(e.target.closest(".left"))move(list,li,-1);if(e.target.closest(".right"))move(list,li,1)});list.addEventListener("change",e=>{if(!e.target.classList.contains("position"))return;const li=e.target.closest(".card"),n=Number(e.target.value)-1;list.insertBefore(li,list.children[n]||null);ranks(list);li.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"})});ranks(list)}
 for(let i=0;i<4;i++)renderEdition(i);
-
-function updateRanks(list){[...list.children].forEach((li,i)=>li.querySelector(".rank").textContent=i+1)}
-async function loadPdf(url){if(pdfCache[url])return pdfCache[url];const p=await pdfjsLib.getDocument(url).promise;pdfCache[url]=p;return p}
-async function renderThumb(box,url){try{const pdf=await loadPdf(url),page=await pdf.getPage(1),vp0=page.getViewport({scale:1}),vp=page.getViewport({scale:100/vp0.width}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;await page.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;box.innerHTML="";box.appendChild(c)}catch(e){}}
-async function openPdf(url,title){const body=document.getElementById("modalBody");body.textContent="読み込み中…";document.getElementById("modalTitle").textContent=title;document.getElementById("modal").classList.add("open");try{const pdf=await loadPdf(url);body.innerHTML="";for(let n=1;n<=pdf.numPages;n++){const page=await pdf.getPage(n),v0=page.getViewport({scale:1}),v=page.getViewport({scale:Math.min(760,body.clientWidth||760)/v0.width}),c=document.createElement("canvas");c.width=v.width;c.height=v.height;body.appendChild(c);await page.render({canvasContext:c.getContext("2d"),viewport:v}).promise}}catch(e){body.innerHTML="<p>PDFを読み込めませんでした。ファイル名と配置を確認してください。</p>"}}
-document.addEventListener("click",e=>{const t=e.target.closest(".open,.thumb");if(t&&t.dataset.pdf)openPdf(t.dataset.pdf,t.dataset.title)});
-document.getElementById("closeModal").onclick=()=>document.getElementById("modal").classList.remove("open");
-document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")e.currentTarget.classList.remove("open")};
-
-function value(id){return document.getElementById(id).value.trim()}
-function validatePage(){
-  if(state.page===0)return document.getElementById("consent").checked||alert("研究参加への同意を確認してください。");
-  if(state.page===1){
-    const ids=["name","email","ageBand","role","musicYears","guitarYears","level"];
-    if(ids.some(id=>!value(id))){alert("必須項目を入力してください。");return false}
-    if(!document.getElementById("email").checkValidity()){alert("メールアドレスを確認してください。");return false}
-  }
-  if(state.page>=2&&state.page<=5){
-    const host=document.getElementById("editionHost"+(state.page-1)),min=Number(host.querySelector(".range-min").value),max=Number(host.querySelector(".range-max").value);
-    if(host.querySelector(".range-min").value===""||host.querySelector(".range-max").value===""){alert("この版の難易度範囲を入力してください。");return false}
-    if(min<0||max>100||min>=max){alert("難易度範囲は0〜100で、最も易しい値を最も難しい値より小さくしてください。");return false}
-  }
-  return true;
-}
-function captureEdition(pos){
-  const ed=editionByPosition(pos),host=document.getElementById("editionHost"+(pos+1)),list=host.querySelector(".score-list");
-  const comments={};
-  [...list.children].forEach(li=>{comments[li.dataset.id]={tags:[...li.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value),comment:li.querySelector(".comment").value.trim()}});
-  state.editions[ed.id]={...state.editions[ed.id],rangeMin:Number(host.querySelector(".range-min").value),rangeMax:Number(host.querySelector(".range-max").value),rankedOrder:[...list.children].map(li=>li.dataset.id),pieceComments:comments,editionComment:host.querySelector(".edition-comment").value.trim(),durationMs:Date.now()-state.editions[ed.id].startedAt};
-}
-function showPage(n){document.querySelectorAll(".page").forEach((p,i)=>p.classList.toggle("active",i===n));state.page=n;document.getElementById("back").style.display=n===0?"none":"";document.getElementById("next").textContent=n===6?"回答と書類を送信":"次へ";window.scrollTo({top:0,behavior:"smooth"})}
-document.getElementById("back").onclick=()=>showPage(Math.max(0,state.page-1));
-document.getElementById("next").onclick=async()=>{
-  if(!validatePage())return;
-  if(state.page>=2&&state.page<=5)captureEdition(state.page-2);
-  if(state.page<6){showPage(state.page+1);return}
-  await submitAll();
-};
-
-function buildSurveyPayload(){
-  return {action:"survey",studyId:CONFIG.studyId,participantId:state.participantId,consent:true,
-    participant:{name:value("name"),email:value("email"),ageBand:value("ageBand"),role:value("role"),musicYears:Number(value("musicYears")),guitarYears:Number(value("guitarYears")),classicalYears:value("classicalYears")===""?null:Number(value("classicalYears")),teachingYears:value("teachingYears")===""?null:Number(value("teachingYears")),level:value("level"),affiliation:value("affiliation")},
-    editionOrder:state.editionOrder,editions:state.editions,durationMs:Date.now()-state.startedAt,clientTimestamp:new Date().toISOString(),userAgent:navigator.userAgent};
-}
-function fileToBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]);r.onerror=reject;r.readAsDataURL(file)})}
-async function post(payload){await fetch(CONFIG.endpointUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),keepalive:true})}
-async function submitAll(){
-  const file=document.getElementById("paymentFile").files[0],status=document.getElementById("finalStatus"),btn=document.getElementById("next");
-  if(!file){alert("記入済みの支払い用Excelファイルを選択してください。");return}
-  if(!file.name.toLowerCase().endsWith(".xlsx")){alert(".xlsxファイルを選択してください。");return}
-  if(file.size>5*1024*1024){alert("ファイルサイズは5MB以下にしてください。");return}
-  btn.disabled=true;btn.textContent="送信中…";status.className="status";status.textContent="";
-  const survey=buildSurveyPayload();
-  try{
-    await post(survey);
-    const base64=await fileToBase64(file);
-    await post({action:"paymentFile",studyId:CONFIG.studyId,participantId:state.participantId,originalName:file.name,mimeType:file.type||"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",base64});
-    localStorage.setItem("lastSurveyBackup",JSON.stringify(survey));
-    status.className="status ok";status.innerHTML=`送信しました。ご協力ありがとうございました。<br><span class="small">受付ID：${state.participantId}</span>`;
-    btn.textContent="送信完了";
-  }catch(err){
-    localStorage.setItem("unsentSurveyBackup",JSON.stringify(survey));
-    status.className="status error";status.textContent="送信できませんでした。通信環境を確認して、もう一度お試しください。";
-    btn.disabled=false;btn.textContent="もう一度送信";
-  }
-}
-showPage(0);
-</script>
-</body>
-</html>
+function ranks(list){[...list.children].forEach((li,i)=>{li.querySelector(".rank").textContent=`${i+1}位`;const s=li.querySelector(".position");s.innerHTML=[...list.children].map((_,k)=>`<option value="${k+1}">${k+1}位へ</option>`).join("");s.value=String(i+1)})}
+function move(list,li,d){const a=[...list.children],i=a.indexOf(li),j=Math.max(0,Math.min(a.length-1,i+d));if(i===j)return;if(j>i)list.insertBefore(li,a[j].nextSibling);else list.insertBefore(li,a[j]);ranks(list);li.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"})}
+async function pdf(url){if(cache[url])return cache[url];return cache[url]=await pdfjsLib.getDocument(url).promise}async function thumb(box,url){try{const d=await pdf(url),p=await d.getPage(1),v0=p.getViewport({scale:1}),v=p.getViewport({scale:280/v0.width}),c=document.createElement("canvas");c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext("2d"),viewport:v}).promise;box.innerHTML="";box.appendChild(c)}catch(e){}}
+async function openPdf(url,title){const b=document.getElementById("modalBody");b.textContent="読み込み中…";document.getElementById("modalTitle").textContent=title;document.getElementById("modal").classList.add("open");try{const d=await pdf(url);b.innerHTML="";for(let n=1;n<=d.numPages;n++){const p=await d.getPage(n),v0=p.getViewport({scale:1}),v=p.getViewport({scale:Math.min(840,b.clientWidth||840)/v0.width}),c=document.createElement("canvas");c.width=v.width;c.height=v.height;b.appendChild(c);await p.render({canvasContext:c.getContext("2d"),viewport:v}).promise}}catch(e){b.innerHTML="<p>PDFを読み込めません。配置とファイル名を確認してください。</p>"}}
+document.addEventListener("click",e=>{const t=e.target.closest(".open,.thumb");if(t&&t.dataset.url)openPdf(t.dataset.url,t.dataset.title)});document.getElementById("closeModal").onclick=()=>document.getElementById("modal").classList.remove("open");document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")e.currentTarget.classList.remove("open")};
+const val=id=>document.getElementById(id).value.trim(),checks=sel=>[...document.querySelectorAll(`${sel}:checked`)].map(x=>x.value);
+function validate(){if(state.page===0){if(!document.getElementById("consent").checked){alert("同意を確認してください。");return false}}if(state.page===1){for(const id of ["name","email","ageBand","level","musicYears","guitarYears"]){if(!val(id)){alert("必須項目を入力してください。");return false}}if(!document.getElementById("email").checkValidity()){alert("メールアドレスを確認してください。");return false}if(checks("#roles input").length===0){alert("現在の立場を1つ以上選んでください。");return false}}if(state.page>=2&&state.page<=5){const host=document.getElementById(`host${state.page-1}`);for(const li of host.querySelectorAll(".card")){if(li.querySelectorAll(".factor-grid input:checked").length===0){li.scrollIntoView({behavior:"smooth",inline:"center"});alert(`${li.querySelector(".piece-title").textContent}の難しい要因を選んでください。`);return false}if(!li.querySelector(".comment").value.trim()){li.scrollIntoView({behavior:"smooth",inline:"center"});alert(`${li.querySelector(".piece-title").textContent}のコメントを入力してください。`);return false}}const a=host.querySelector(".rangeMin"),b=host.querySelector(".rangeMax"),mn=Number(a.value),mx=Number(b.value);if(a.value===""||b.value===""){alert("難易度範囲を入力してください。");return false}if(mn<0||mx>100||mn>=mx){alert("難易度範囲を確認してください。");return false}}return true}
+function capture(pos){const ed=edAt(pos),host=document.getElementById(`host${pos+1}`),list=host.querySelector(".score-list"),pieceComments={};[...list.children].forEach(li=>pieceComments[li.dataset.id]={factors:[...li.querySelectorAll(".factor-grid input:checked")].map(x=>x.value),comment:li.querySelector(".comment").value.trim()});state.editions[ed.id]={...state.editions[ed.id],rankedOrder:[...list.children].map(x=>x.dataset.id),rangeMin:Number(host.querySelector(".rangeMin").value),rangeMax:Number(host.querySelector(".rangeMax").value),pieceComments,editionComment:host.querySelector(".editionComment").value.trim(),durationMs:Date.now()-state.editions[ed.id].startedAt}}
+function show(n){document.querySelectorAll(".page").forEach((p,i)=>p.classList.toggle("active",i===n));state.page=n;document.getElementById("back").style.display=n===0?"none":"";document.getElementById("next").textContent=n===6?"回答と書類を送信":"次へ";scrollTo({top:0,behavior:"smooth"})}
+document.getElementById("back").onclick=()=>show(Math.max(0,state.page-1));document.getElementById("next").onclick=async()=>{if(!validate())return;if(state.page>=2&&state.page<=5)capture(state.page-2);if(state.page<6)return show(state.page+1);await submitAll()};document.getElementById("paymentDownload").href=`${CONFIG.endpointUrl}?mode=download`;
+function survey(){return{action:"survey",studyId:CONFIG.studyId,participantId:state.participantId,consent:true,participant:{name:val("name"),email:val("email"),ageBand:val("ageBand"),roles:checks("#roles input"),level:val("level"),musicYears:Number(val("musicYears")),guitarYears:Number(val("guitarYears")),teachingYears:val("teachingYears")===""?null:Number(val("teachingYears")),affiliation:val("affiliation")},editionOrder:state.editionOrder,editions:state.editions,durationMs:Date.now()-state.startedAt,clientTimestamp:new Date().toISOString(),userAgent:navigator.userAgent}}
+const file64=file=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(file)});async function post(x){await fetch(CONFIG.endpointUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(x)})}
+async function submitAll(){const f=document.getElementById("paymentFile").files[0],st=document.getElementById("finalStatus"),btn=document.getElementById("next");if(!f){alert("記入済みExcelを選択してください。");return}if(!f.name.toLowerCase().endsWith(".xlsx")||f.size>5*1024*1024){alert("5MB以下の.xlsxを選択してください。");return}btn.disabled=true;btn.textContent="送信中…";const s=survey();try{await post(s);await post({action:"paymentFile",studyId:CONFIG.studyId,participantId:state.participantId,originalName:f.name,mimeType:f.type,base64:await file64(f)});localStorage.setItem("surveyBackup",JSON.stringify(s));st.className="status ok";st.innerHTML=`送信しました。ご協力ありがとうございました。<br>受付ID：${state.participantId}`;btn.textContent="送信完了"}catch(e){localStorage.setItem("unsentSurveyBackup",JSON.stringify(s));st.className="status error";st.textContent="送信できませんでした。通信環境を確認してください。";btn.disabled=false;btn.textContent="もう一度送信"}}
+show(0);
+</script></body></html>
