@@ -1,3 +1,214 @@
+
+Claudeが応答を完了しました
+楽譜を表示した上で、右側に項目を列挙したらどう？スクロールが多すぎる
+
+
+カード レイアウトを横並びに再構築中
+カード レイアウトを横並びに再構築中
+Now let's restructure the markup for a side-by-side layout (score left, items right):
+
+
+Restructure card-body: score preview + open button on the left, factors/comment stacked on the right, side by side
+Restructure card-body: score preview + open button on the left, factors/comment stacked on the right, side by side
+Now update the CSS accordingly:
+
+
+ファイルを編集しました, コマンドを実行しました
+ファイルを編集しました, コマンドを実行しました
+Good — the later rule (line 130) wins since it comes after, but let's clean up the stale duplicate to avoid confusion:
+
+
+Remove stale duplicate card-thumb rule
+Remove stale duplicate card-thumb rule
+Now let's validate and test the new layout end-to-end.
+
+
+レイアウト検証を完了し、モバイル確認を別途実行する必要性を認識した。
+レイアウト検証を完了し、モバイル確認を別途実行する必要性を認識した。
+Both confirmed: desktop shows side-by-side (score left, items right, same top alignment), mobile stacks vertically for readability. Let's finalize.
+
+
+コマンドを実行しました, ファイルを読み取りました
+コマンドを実行しました, ファイルを読み取りました
+レイアウトを横並びに変更しました。
+
+左側：楽譜プレビュー（少し縦長に、460px）＋「楽譜を大きく開く」ボタン
+右側：難しい要因（左手／右手／その他）と判断理由・コメントを縦に並べて配置
+楽譜を見ながら同じ画面内で要因を選べるので、スクロール量がかなり減るはずです。画面が狭いモバイル（幅820px以下）では、これまで通り縦積みに自動で切り替わります。
+
+デスクトップで左右並びになっていること、モバイルで縦積みに戻ることをPlaywrightで確認済みです。
+
+阿部保夫版の曲番号の件、まだ確認いただけていません。「No.1,2〜10,12」の正しい10曲の番号列があれば教えてください。
+
+
+Index
+コード · HTML 
+
+Guitar difficulty survey complete redesigned
+ZIP 
+要因の項目を選んでも、次へを押すと初期に戻ってしまう
+
+
+システムが意図通り機能していることを検証中
+システムが意図通り機能していることを検証中
+Let's add a live status indicator and highlight incomplete cards, so the requirement is visible before hitting "次へ" rather than only via the alert.
+
+
+Add a live factor-completion status line inside the ① panel
+Add a live factor-completion status line inside the ① panel
+Now let's wire up the live status/highlighting logic and hook it into renderEdition:
+
+
+Call refreshFactorStatus initially and on every factor checkbox change
+Call refreshFactorStatus initially and on every factor checkbox change
+Now let's add the CSS for the status line and the incomplete-card highlight:
+
+
+CSS特異性を検証し、セレクタの優先順位を確認した。
+CSS特異性を検証し、セレクタの優先順位を確認した。
+Live status counter works perfectly, updating in real time as factors are checked. Let's finalize the deliverable.
+
+
+コマンドを実行しました, ファイルを読み取りました
+コマンドを実行しました, ファイルを読み取りました
+実際に再現して確認したところ、これはバグではなく仕様通りの動作でした。
+
+原因：「①要因・コメント」は10曲すべてで要因を最低1つ選ぶ必要があります。一部の曲だけ選んで「次へ」を押すと、まだ選んでいない曲（例えば「No.2」）を教えるアラートが出て、その曲の位置まで自動スクロールします。これが「入力した内容が消えて最初に戻った」ように見えていたのだと思います。実際にはチェック内容は消えておらず、ページも移動していません（テストで確認済み）。
+
+ただ、アラートだけだと分かりにくいので、進捗が常に見える化されるようにしました。
+
+「①」パネルの上部に「要因が未選択の曲：あと◯曲」というライブ表示を追加
+全部選び終えると「✓ 10曲すべてで要因を選択しました」に変わる
+未選択の曲のカードには左側に赤いラインが表示され、どのカードが残っているか一覧内で見分けられる
+チェックのたびにこの表示がリアルタイムで更新されることを確認済みです。
+
+なお、阿部保夫版の曲番号（「No.1,2〜10,12」の正しい番号列）はまだ確認できていません。教えていただければ反映します。
+
+
+Index
+コード · HTML 
+
+Guitar difficulty survey complete redesigned
+ZIP 
+あ、次へを押したら上にスライドしながら次のページに行く仕様だからわかりにくいのかも。パッと変わってほしい
+
+
+アニメーション仕様を解析し、即座の変更を検討中。
+アニメーション仕様を解析し、即座の変更を検討中。
+Let's remove the slide/fade animation so page changes are instant:
+
+
+ファイルを編集しました, コマンドを実行しました
+ファイルを編集しました, コマンドを実行しました
+Let's make the scroll-to-top instant too, so the whole page transition snaps immediately:
+
+
+ページ遷移のアニメーション遅延を解消している。
+ページ遷移のアニメーション遅延を解消している。
+Now let's finalize the deliverable.
+
+
+コマンドを実行しました, ファイルを読み取りました
+コマンドを実行しました, ファイルを読み取りました
+ページ切り替えをパッと瞬時に変わるようにしました。
+
+ページ全体にかかっていたフェード＋スライドのアニメーションを削除
+ページ上部へのスクロールも「smooth（ゆっくり）」から「instant（瞬時）」に変更
+これで「次へ」を押すと即座に切り替わるので、バリデーションで止まっているのか、実際に進んだのかがはっきり区別できるはずです。
+
+阿部保夫版の曲番号（「No.1,2〜10,12」の正しい10曲の番号列）は引き続き確認をお願いします。
+
+
+Index
+コード · HTML 
+
+Guitar difficulty survey complete redesigned
+ZIP 
+（下の一覧で赤い印がついている曲です）で赤い印ついてる？
+
+あと、全部終わったら、ページを移動して終わったことがわかるようにして。今は謝金画面のまま、下にメッセージが表示されるだけ。
+
+あと、スプレッドシートに入力結果が反映されなかった。
+
+
+UI改善、完了画面追加、データ送信問題を診断した。
+UI改善、完了画面追加、データ送信問題を診断した。
+Let's tackle these one at a time. First, let me check why the red marker might not be visible — likely too subtle — and verify with an actual render test.
+
+
+CSSスタイルが微妙すぎて視認困難と診断中。
+CSSスタイルが微妙すぎて視認困難と診断中。
+It's technically applied, but a thin 4px edge is too subtle to register as "a mark." Let's make it unmistakable with a colored badge next to the title.
+
+
+コマンドを実行しました, ファイルを編集しました
+コマンドを実行しました, ファイルを編集しました
+Now let's strengthen the CSS so it's unmistakable:
+
+
+Make the needs-factor indicator much more visible: full border + background wash + a red badge
+Make the needs-factor indicator much more visible: full border + background wash + a red badge
+Now let's add a proper completion screen. First, locate the current success-handling code:
+
+
+Locate submitAll and main structure for adding completion screen
+Locate submitAll and main structure for adding completion screen
+Let's add a dedicated completion screen and switch to it after successful submission:
+
+
+Add a full-screen completion/thank-you screen shown after main content
+Add a full-screen completion/thank-you screen shown after main content
+Now let's update submitAll() to switch to this screen on success:
+
+
+On successful submission, hide the form and switch to the dedicated completion screen instead of just updating inline status text
+On successful submission, hide the form and switch to the dedicated completion screen instead of just updating inline status text
+Now let's add the CSS: hide doneScreen by default, hide the form/nav/topbar-stepper once .done is on <body>, and show the completion screen.
+
+
+コマンドを実行しました, ファイルを編集しました
+コマンドを実行しました, ファイルを編集しました
+Now let's validate and run a full end-to-end test confirming the completion screen appears and diagnosing the spreadsheet issue by inspecting actual outgoing requests.
+
+
+フロントエンド検証済み、バックエンド診断手順を構想した。
+フロントエンド検証済み、バックエンド診断手順を構想した。
+Both other fixes verified working perfectly. Now for the spreadsheet issue — let's confirm the actual network requests going out are well-formed (ruling out a frontend bug), which the test above already captured. Let's finalize the deliverable.
+
+
+コマンドを実行しました, ファイルを読み取りました
+コマンドを実行しました, ファイルを読み取りました
+3つ対応・確認しました。
+
+① 赤い印：実際に調べたところ、CSSは適用されていましたが、4pxの左線だけだと本当に目立たず「印」として認識しにくい状態でした。曲タイトルの横に赤い「要因未選択」バッジを追加し、カード自体にもはっきり赤枠＋薄い赤の背景がつくように強化しました。
+
+② 完了画面：送信成功後は謝金ページに留まらず、専用の完了画面に切り替わるようにしました（大きなチェックマーク＋「ご協力ありがとうございました」＋受付ID）。フォームやナビゲーションは非表示になります。
+
+③ スプレッドシート反映の件：これはフロントエンド側のバグではなさそうです。実際に送信される通信内容をテストで検証したところ、surveyとpaymentDetailsの2件のPOSTリクエストが正しい形式（Content-Type、フィールド構成ともCode.gs側の期待通り）で送信されていることを確認しました。つまりブラウザ側は正しくデータを送り出せています。
+
+考えられる原因は主にデプロイ側です。お手数ですが確認をお願いできますか。
+
+送信後に出たメッセージは「送信できませんでした」というエラー表示でしたか？　それとも今回追加した完了画面（またはこれまでの「送信しました」表示）は出ましたか？
+Code.gsを保存しただけでなく、デプロイを管理 → 編集 → 新しいバージョン → デプロイ まで行いましたか？（保存だけでは古いコードのまま動き続けます）
+index.html内のCONFIG.endpointUrlが、現在有効なデプロイの /exec URLと一致していますか？
+Apps Scriptエディタの「実行数」（Executions）ログにエラーが出ていませんか？
+このあたりを教えていただければ、原因を絞り込めると思います。
+
+
+Index
+コード · HTML 
+
+Guitar difficulty survey complete redesigned
+ZIP 
+
+
+
+
+
+Claude は AI のため、誤りを含む可能性があります。回答内容は必ずご確認ください。
+
+
+Index · HTML
 <!doctype html>
 <html lang="ja"><head>
 <meta charset="utf-8">
@@ -41,7 +252,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-bo
 }
 ::selection{background:var(--gold-soft);color:var(--accent-ink)}
 :focus-visible{outline:2.5px solid var(--gold);outline-offset:2px;border-radius:4px}
-
+ 
 /* ---------- top bar / fretboard stepper ---------- */
 .topbar{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#241a10,#1a130c);border-bottom:1px solid #0d0906;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .topbar-inner{max-width:1260px;margin:auto;padding:12px 18px}
@@ -50,7 +261,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-bo
 .brand-text{display:flex;flex-direction:column;line-height:1.15}
 .brand-text strong{font-family:var(--font-display);font-weight:700;font-size:16px;color:#f4ead9;letter-spacing:.02em}
 .brand-text span{font-size:11px;color:#c9b898}
-
+ 
 .stepper{list-style:none;display:flex;margin:0;padding:0;position:relative;gap:0}
 .stepper::before{content:"";position:absolute;left:14px;right:14px;top:13px;height:2px;background:linear-gradient(90deg,#4a3320,#6b4b28 30%,#4a3320);border-radius:2px}
 .step{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;min-width:0;padding-top:0}
@@ -61,29 +272,37 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-bo
 .step.current .dot{background:var(--accent);border-color:#e0a98f;color:#fff;box-shadow:0 0 0 4px rgba(122,46,29,.35)}
 .step.current .label{color:#fff;font-weight:700}
 @media(max-width:640px){.step .label{display:none}.stepper::before{top:13px}}
-
+ 
 /* ---------- layout ---------- */
 main{max-width:1260px;margin:auto;padding:28px 18px 120px}
+body.done main,body.done .nav{display:none}
+body.done .topbar .stepper{visibility:hidden}
+#doneScreen{display:none}
+body.done #doneScreen{display:flex;min-height:80vh;align-items:center;justify-content:center;padding:24px}
+.done-panel{max-width:480px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:44px 36px;box-shadow:var(--shadow-2)}
+.done-check{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;font-size:32px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.done-panel h1{margin-bottom:10px}
+.done-panel .small{margin-top:14px}
 .page{display:none}
 .page.active{display:block}
-
+ 
 h1{font-family:var(--font-display);font-weight:800;font-size:27px;margin:0 0 8px;color:var(--ink);letter-spacing:.01em}
 h2{font-family:var(--font-display);font-weight:700;font-size:21px;margin:0 0 6px;color:var(--ink)}
 h3{font-family:var(--font-body);font-weight:700;font-size:15px;margin:0 0 8px;color:var(--ink-soft)}
 .lead{color:var(--muted);margin:0 0 4px}
 .small{font-size:12.5px;color:var(--muted)}
 .eyebrow{font-size:11.5px;letter-spacing:.14em;color:var(--gold);font-weight:700;text-transform:uppercase;margin:0 0 6px}
-
+ 
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:var(--shadow-1)}
 .notice{background:var(--gold-soft);border:1px solid #e3cb95;border-radius:var(--radius-sm);padding:12px 14px;color:#5c471c;font-size:13px}
-
+ 
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;color:var(--ink-soft)}
 input,select,textarea{font:inherit;width:100%;border:1.5px solid var(--line-strong);border-radius:var(--radius-sm);padding:10px 11px;background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s}
 input:hover,select:hover,textarea:hover{border-color:var(--gold)}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
 textarea{resize:vertical}
-
+ 
 .checkline{display:flex;gap:10px;align-items:flex-start}
 .checkline input{width:auto;margin-top:4px;accent-color:var(--accent)}
 .choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -91,9 +310,9 @@ textarea{resize:vertical}
 .choice input{width:auto;margin-top:3px;accent-color:var(--accent)}
 .choice:hover{border-color:var(--gold)}
 .choice.is-checked{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
-
+ 
 .pdf-frame{width:100%;height:68vh;border:1px solid var(--line);border-radius:var(--radius-sm)}
-
+ 
 /* ---------- ① vertical rank list (drag up/down, always one column) ---------- */
 .rank-panel{padding-bottom:16px}
 .order-label{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin:10px 3px 6px;font-weight:600}
@@ -107,12 +326,14 @@ textarea{resize:vertical}
 .rc-label{flex:1;min-width:0;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rc-tools{display:flex;align-items:center;gap:3px;flex:none}
 .rc-tools .mini{padding:5px 8px;font-size:12px}
-
+ 
 /* ---------- ③ detail list (scrolls, synced with rank strip) ---------- */
 .detail-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
 .factor-status{font-size:12.5px;font-weight:700;color:var(--accent);margin:2px 0 10px}
 .factor-status.ok{color:var(--ok)}
-.card.needs-factor{border-left:4px solid var(--bad)}
+.card.needs-factor{border:2px solid var(--bad);background:var(--bad-soft)}
+.incomplete-badge{display:none;font-size:11px;font-weight:800;color:#fff;background:var(--bad);padding:3px 10px;border-radius:999px;letter-spacing:.02em}
+.card.needs-factor .incomplete-badge{display:inline-block}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-1)}
 .card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .rank{flex:none;font-family:var(--font-display);font-weight:800;font-size:14px;color:#fff;background:var(--accent);border-radius:999px;padding:3px 12px;letter-spacing:.02em}
@@ -147,7 +368,7 @@ textarea{resize:vertical}
 .ds-input::-moz-range-track{background:transparent;height:22px}
 .ds-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;width:24px;height:24px;border-radius:50%;background:#fff;border:2.5px solid var(--accent);cursor:pointer;box-shadow:var(--shadow-2);margin-top:0}
 .ds-input::-moz-range-thumb{pointer-events:auto;width:24px;height:24px;border-radius:50%;background:#fff;border:2.5px solid var(--accent);cursor:pointer;box-shadow:var(--shadow-2)}
-
+ 
 /* ---------- bottom nav ---------- */
 .nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:12px;display:flex;justify-content:center;gap:12px;z-index:30;box-shadow:0 -6px 20px -12px rgba(32,25,15,.25)}
 button{font:inherit;padding:11px 22px;border-radius:999px;cursor:pointer;font-weight:700;letter-spacing:.01em;transition:transform .1s,box-shadow .15s,background .15s}
@@ -160,7 +381,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .status{text-align:center;font-size:13.5px;font-weight:600}
 .status.ok{color:var(--ok)}
 .status.error{color:var(--bad)}
-
+ 
 /* ---------- misc ---------- */
 .download{display:inline-block;background:var(--gold-soft);color:var(--accent-ink);padding:11px 16px;border-radius:var(--radius-sm);text-decoration:none;font-weight:700;border:1px solid #e3cb95}
 .modal{display:none;position:fixed;inset:0;background:rgba(20,15,9,.72);z-index:60}
@@ -172,14 +393,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .sheet canvas{width:100%;border:1px solid var(--line);margin-bottom:12px;border-radius:4px}
 .close{background:#fff;border:1.5px solid var(--line-strong);border-radius:999px;width:34px;height:34px;padding:0;font-size:16px;flex:none}
 .close:hover{border-color:var(--gold)}
-
+ 
 @media(max-width:720px){
   .grid,.choice-grid{grid-template-columns:1fr}
   .card{flex-basis:88vw}
 }
 </style></head>
 <body>
-
+ 
 <header class="topbar">
   <div class="topbar-inner">
     <div class="brand">
@@ -196,9 +417,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <ol class="stepper" id="stepper"></ol>
   </div>
 </header>
-
+ 
 <main>
-
+ 
 <section class="page active" data-page="0">
   <p class="eyebrow">Step 1</p>
   <h1>研究にご協力いただきありがとうございます</h1>
@@ -214,7 +435,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <label class="checkline" style="margin-top:10px"><input id="adult" type="checkbox"><span>私は18歳以上です。本調査は18歳未満の方にはご協力いただけません。</span></label>
   </div>
 </section>
-
+ 
 <section class="page" data-page="1">
   <p class="eyebrow">Step 2</p>
   <h2>協力者情報</h2>
@@ -244,12 +465,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
   </div>
 </section>
-
+ 
 <section class="page" data-page="2"><div id="host1"></div></section>
 <section class="page" data-page="3"><div id="host2"></div></section>
 <section class="page" data-page="4"><div id="host3"></div></section>
 <section class="page" data-page="5"><div id="host4"></div></section>
-
+ 
 <section class="page" data-page="6">
   <p class="eyebrow">Step 7</p>
   <h2>謝金支払い情報</h2>
@@ -265,7 +486,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="field"><label>現住所の郵便番号 *</label><input id="currentPostal" inputmode="numeric"></div>
     <div class="field" style="grid-column:1/-1"><label>現住所 *</label><input id="currentAddress" autocomplete="street-address"></div>
   </div>
-
+ 
   <div class="panel">
     <label class="checkline"><input id="sameResidentAddress" type="checkbox"><span>住民登録住所は現住所と同じ</span></label>
     <div id="residentAddressFields" class="grid" style="margin-top:14px">
@@ -273,7 +494,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="field"><label>住民登録住所 *</label><input id="residentAddress"></div>
     </div>
   </div>
-
+ 
   <div class="panel">
     <h3>振込先</h3>
     <div class="field"><label>金融機関の種類 *</label>
@@ -298,21 +519,31 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
   <div id="finalStatus" class="status"></div>
 </section>
-
+ 
 </main>
-
+ 
+<section id="doneScreen">
+  <div class="done-panel">
+    <div class="done-check">✓</div>
+    <h1>ご協力ありがとうございました</h1>
+    <p class="lead">回答と支払い情報の送信が完了しました。</p>
+    <p class="small">受付ID：<b id="doneParticipantId"></b></p>
+    <p class="small">この画面を閉じていただいて構いません。</p>
+  </div>
+</section>
+ 
 <div class="nav">
   <button id="back" class="secondary" style="display:none">戻る</button>
   <button id="next" class="primary">次へ</button>
 </div>
-
+ 
 <div id="modal" class="modal">
   <div class="sheet">
     <div class="sheet-head"><h3 id="modalTitle"></h3><button id="closeModal" class="close" aria-label="閉じる">✕</button></div>
     <div class="sheet-body"><div id="modalBody"></div></div>
   </div>
 </div>
-
+ 
 <script>
 function mkPieces(nums){return nums.map((n,i)=>({id:`p${String(i+1).padStart(2,"0")}`,label:`No.${n}`,file:`${String(i+1).padStart(2,"0")}.pdf`}))}
 const CONFIG={endpointUrl:"https://script.google.com/macros/s/AKfycbwXDUl5NykDwOPti0NFqSNc1IZRjMl3WhUpAjgcISPE_YVJQnkRy1WDmwc9A9AlEmWrvw/exec",studyId:"guitar_difficulty_2026",editions:[
@@ -331,7 +562,7 @@ const FACTOR_GROUPS=[
 const state={page:0,participantId:(crypto.randomUUID?crypto.randomUUID():`P${Date.now()}`),startedAt:Date.now(),editionOrder:[],editions:{}};const cache={};
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}state.editionOrder=shuffle(CONFIG.editions.map(x=>x.id));
 function edAt(pos){return CONFIG.editions.find(x=>x.id===state.editionOrder[pos])}
-function renderEdition(pos){const ed=edAt(pos),host=document.getElementById(`host${pos+1}`),shown=ed.pieces;state.editions[ed.id]={presentedOrder:shown.map(x=>x.id),startedAt:Date.now()};host.innerHTML=`<p class="eyebrow">Step ${pos+3}</p><h2>${ed.label}：10曲の難易度評価</h2><div class="panel"><h3>① 曲ごとの理由・コメント</h3><p class="small">エチュード番号順に並んでいます。1曲ずつ楽譜を確認しながら、難しい要因とコメントを入力してください。</p><div class="factor-status"></div><ul class="detail-list"></ul></div><div class="panel rank-panel"><h3>② 難易度順に並べる</h3><p class="small">①の内容をもとに、曲をドラッグするか▲▼ボタンで上から易しい順に並べ替えてください。</p><div class="order-label"><span>↑ 最も易しい</span><span>最も難しい ↓</span></div><ul class="rank-strip"></ul></div><div class="panel"><h3>③ この版全体の難易度範囲</h3><p class="small">10段階で、この版に含まれる10曲の難易度の範囲（最も易しい〜最も難しい）を選んでください。</p><div class="dual-slider" data-touched="0"><div class="ds-track"><div class="ds-fill"></div></div><input type="range" class="ds-input rangeMin" min="1" max="10" step="1" value="1" aria-label="最も易しい曲のレベル"><input type="range" class="ds-input rangeMax" min="1" max="10" step="1" value="10" aria-label="最も難しい曲のレベル"><div class="ds-labels"><span>易しい　<b class="ds-min-label">1</b></span><span><b class="ds-max-label">10</b>　難しい</span></div></div></div>`;initDualSlider(host.querySelector(".dual-slider"));const strip=host.querySelector(".rank-strip"),detail=host.querySelector(".detail-list");shown.forEach(piece=>{const url=`${ed.folder}/${piece.file}`,title=`${ed.label} ${piece.label}`;const chip=document.createElement("li");chip.className="rankchip";chip.dataset.id=piece.id;chip.innerHTML=`<span class="rc-num"></span><div class="thumb rc-thumb" data-url="${url}" data-title="${title}"></div><span class="rc-label">${piece.label}</span><span class="rc-tools"><button type="button" class="mini rc-up" aria-label="1つ上へ">▲</button><button type="button" class="mini rc-down" aria-label="1つ下へ">▼</button></span>`;strip.appendChild(chip);thumb(chip.querySelector(".rc-thumb"),url,140);const li=document.createElement("li");li.className="card";li.dataset.id=piece.id;li.innerHTML=`<div class="card-head"><span class="rank"></span><span class="piece-title">${piece.label}</span></div><div class="card-body"><div class="card-main"><div class="thumb card-thumb" data-url="${url}" data-title="${title}"></div><button type="button" class="open" data-url="${url}" data-title="${title}">楽譜を大きく開く（全ページ）</button></div><div class="card-side"><div><div class="small"><b>難しい要因 *</b></div><div class="factor-groups">${FACTOR_GROUPS.map(g=>`<div class="factor-group"><div class="fg-title">${g.label}</div><div class="factor-grid">${g.items.map(f=>`<label class="choice"><input type="checkbox" value="${f}">${f}</label>`).join("")}</div></div>`).join("")}</div></div><div><div class="small"><b>判断理由・コメント（任意）</b></div><textarea class="comment" placeholder="この順位にした理由や注目した点（任意）"></textarea><div class="required-note">要因を1つ以上選んでください。</div></div></div></div>`;detail.appendChild(li);thumb(li.querySelector(".card-thumb"),url,420)});new Sortable(strip,{animation:120,direction:"vertical",ghostClass:"dragging",onEnd:()=>{ranksChips(strip);syncDetailOrder(strip,detail)}});strip.addEventListener("click",e=>{const li=e.target.closest(".rankchip");if(!li)return;if(e.target.closest(".rc-up"))moveChip(strip,li,-1,detail);if(e.target.closest(".rc-down"))moveChip(strip,li,1,detail)});ranksChips(strip);syncDetailOrder(strip,detail);detail.addEventListener("change",e=>{if(e.target.matches('.factor-grid input'))refreshFactorStatus(host)});refreshFactorStatus(host)}
+function renderEdition(pos){const ed=edAt(pos),host=document.getElementById(`host${pos+1}`),shown=ed.pieces;state.editions[ed.id]={presentedOrder:shown.map(x=>x.id),startedAt:Date.now()};host.innerHTML=`<p class="eyebrow">Step ${pos+3}</p><h2>${ed.label}：10曲の難易度評価</h2><div class="panel"><h3>① 曲ごとの理由・コメント</h3><p class="small">エチュード番号順に並んでいます。1曲ずつ楽譜を確認しながら、難しい要因とコメントを入力してください。</p><div class="factor-status"></div><ul class="detail-list"></ul></div><div class="panel rank-panel"><h3>② 難易度順に並べる</h3><p class="small">①の内容をもとに、曲をドラッグするか▲▼ボタンで上から易しい順に並べ替えてください。</p><div class="order-label"><span>↑ 最も易しい</span><span>最も難しい ↓</span></div><ul class="rank-strip"></ul></div><div class="panel"><h3>③ この版全体の難易度範囲</h3><p class="small">10段階で、この版に含まれる10曲の難易度の範囲（最も易しい〜最も難しい）を選んでください。</p><div class="dual-slider" data-touched="0"><div class="ds-track"><div class="ds-fill"></div></div><input type="range" class="ds-input rangeMin" min="1" max="10" step="1" value="1" aria-label="最も易しい曲のレベル"><input type="range" class="ds-input rangeMax" min="1" max="10" step="1" value="10" aria-label="最も難しい曲のレベル"><div class="ds-labels"><span>易しい　<b class="ds-min-label">1</b></span><span><b class="ds-max-label">10</b>　難しい</span></div></div></div>`;initDualSlider(host.querySelector(".dual-slider"));const strip=host.querySelector(".rank-strip"),detail=host.querySelector(".detail-list");shown.forEach(piece=>{const url=`${ed.folder}/${piece.file}`,title=`${ed.label} ${piece.label}`;const chip=document.createElement("li");chip.className="rankchip";chip.dataset.id=piece.id;chip.innerHTML=`<span class="rc-num"></span><div class="thumb rc-thumb" data-url="${url}" data-title="${title}"></div><span class="rc-label">${piece.label}</span><span class="rc-tools"><button type="button" class="mini rc-up" aria-label="1つ上へ">▲</button><button type="button" class="mini rc-down" aria-label="1つ下へ">▼</button></span>`;strip.appendChild(chip);thumb(chip.querySelector(".rc-thumb"),url,140);const li=document.createElement("li");li.className="card";li.dataset.id=piece.id;li.innerHTML=`<div class="card-head"><span class="rank"></span><span class="piece-title">${piece.label}</span><span class="incomplete-badge">要因未選択</span></div><div class="card-body"><div class="card-main"><div class="thumb card-thumb" data-url="${url}" data-title="${title}"></div><button type="button" class="open" data-url="${url}" data-title="${title}">楽譜を大きく開く（全ページ）</button></div><div class="card-side"><div><div class="small"><b>難しい要因 *</b></div><div class="factor-groups">${FACTOR_GROUPS.map(g=>`<div class="factor-group"><div class="fg-title">${g.label}</div><div class="factor-grid">${g.items.map(f=>`<label class="choice"><input type="checkbox" value="${f}">${f}</label>`).join("")}</div></div>`).join("")}</div></div><div><div class="small"><b>判断理由・コメント（任意）</b></div><textarea class="comment" placeholder="この順位にした理由や注目した点（任意）"></textarea><div class="required-note">要因を1つ以上選んでください。</div></div></div></div>`;detail.appendChild(li);thumb(li.querySelector(".card-thumb"),url,420)});new Sortable(strip,{animation:120,direction:"vertical",ghostClass:"dragging",onEnd:()=>{ranksChips(strip);syncDetailOrder(strip,detail)}});strip.addEventListener("click",e=>{const li=e.target.closest(".rankchip");if(!li)return;if(e.target.closest(".rc-up"))moveChip(strip,li,-1,detail);if(e.target.closest(".rc-down"))moveChip(strip,li,1,detail)});ranksChips(strip);syncDetailOrder(strip,detail);detail.addEventListener("change",e=>{if(e.target.matches('.factor-grid input'))refreshFactorStatus(host)});refreshFactorStatus(host)}
 function refreshFactorStatus(host){const detail=host.querySelector(".detail-list"),statusEl=host.querySelector(".factor-status"),cards=[...detail.children],incomplete=cards.filter(li=>li.querySelectorAll(".factor-grid input:checked").length===0);cards.forEach(li=>li.classList.toggle("needs-factor",incomplete.includes(li)));if(incomplete.length===0){statusEl.textContent="✓ 10曲すべてで要因を選択しました";statusEl.classList.add("ok")}else{statusEl.textContent=`要因が未選択の曲：あと${incomplete.length}曲（下の一覧で赤い印がついている曲です）`;statusEl.classList.remove("ok")}}
 for(let i=0;i<4;i++)renderEdition(i);
 function ranksChips(strip){[...strip.children].forEach((li,i)=>{li.querySelector(".rc-num").textContent=`${i+1}`})}
@@ -344,16 +575,16 @@ document.addEventListener("click",e=>{const t=e.target.closest(".open,.thumb");i
 const val=id=>document.getElementById(id).value.trim(),checks=sel=>[...document.querySelectorAll(`${sel}:checked`)].map(x=>x.value);
 function validate(){if(state.page===0){if(!document.getElementById("consent").checked){alert("同意を確認してください。");return false}if(!document.getElementById("adult").checked){alert("本調査は18歳以上の方を対象としています。");return false}}if(state.page===1){for(const id of ["name","email","ageBand","level","musicYears","guitarYears"]){if(!val(id)){alert("必須項目を入力してください。");return false}}if(!document.getElementById("email").checkValidity()){alert("メールアドレスを確認してください。");return false}if(checks("#roles input").length===0){alert("現在の立場を1つ以上選んでください。");return false}}if(state.page===6)return validatePayment();if(state.page>=2&&state.page<=5){const host=document.getElementById(`host${state.page-1}`);for(const li of host.querySelectorAll(".card")){if(li.querySelectorAll(".factor-grid input:checked").length===0){li.scrollIntoView({behavior:"smooth",inline:"center"});alert(`${li.querySelector(".piece-title").textContent}の難しい要因を選んでください。`);return false}}const dual=host.querySelector(".dual-slider"),a=host.querySelector(".rangeMin"),b=host.querySelector(".rangeMax"),mn=Number(a.value),mx=Number(b.value);if(dual.dataset.touched!=="1"){dual.scrollIntoView({behavior:"smooth",block:"center"});alert("難易度範囲のスライダーを動かしてください。");return false}if(mn<1||mx>10||mn>=mx){alert("難易度範囲を確認してください。");return false}}return true}
 function capture(pos){const ed=edAt(pos),host=document.getElementById(`host${pos+1}`),strip=host.querySelector(".rank-strip"),detail=host.querySelector(".detail-list"),pieceComments={};[...detail.children].forEach(li=>pieceComments[li.dataset.id]={factors:[...li.querySelectorAll(".factor-grid input:checked")].map(x=>x.value),comment:li.querySelector(".comment").value.trim()});state.editions[ed.id]={...state.editions[ed.id],rankedOrder:[...strip.children].map(x=>x.dataset.id),rangeMin:Number(host.querySelector(".rangeMin").value),rangeMax:Number(host.querySelector(".rangeMax").value),pieceComments,durationMs:Date.now()-state.editions[ed.id].startedAt}}
-
+ 
 /* ---- fretboard step indicator ---- */
 const STEP_LABELS=["同意","基本情報","評価 1/4","評価 2/4","評価 3/4","評価 4/4","支払い情報"];
 function renderStepper(){const ol=document.getElementById("stepper");ol.innerHTML=STEP_LABELS.map((label,i)=>`<li class="step" data-i="${i}"><span class="dot">${i+1}</span><span class="label">${label}</span></li>`).join("")}
 function updateStepper(n){document.querySelectorAll(".step").forEach(li=>{const i=Number(li.dataset.i);li.classList.toggle("done",i<n);li.classList.toggle("current",i===n)});const sub=document.getElementById("brandSub");if(sub)sub.textContent=STEP_LABELS[n]}
 renderStepper();
-
+ 
 /* ---- visual feedback for checkbox choices ---- */
 document.addEventListener("change",e=>{if(e.target.matches('.choice input[type="checkbox"]')){e.target.closest(".choice").classList.toggle("is-checked",e.target.checked)}});
-
+ 
 function show(n){document.querySelectorAll(".page").forEach((p,i)=>p.classList.toggle("active",i===n));state.page=n;if(n===6)syncPaymentDefaults();document.getElementById("back").style.display=n===0?"none":"";document.getElementById("next").textContent=n===6?"回答と支払い情報を送信":"次へ";updateStepper(n);scrollTo({top:0,behavior:"instant"})}
 document.getElementById("back").onclick=()=>show(Math.max(0,state.page-1));document.getElementById("next").onclick=async()=>{if(!validate())return;if(state.page>=2&&state.page<=5)capture(state.page-2);if(state.page<6)return show(state.page+1);await submitAll()};
 function survey(){return{action:"survey",studyId:CONFIG.studyId,participantId:state.participantId,consent:true,participant:{name:val("name"),email:val("email"),ageBand:val("ageBand"),roles:checks("#roles input"),level:val("level"),musicYears:Number(val("musicYears")),guitarYears:Number(val("guitarYears")),teachingYears:val("teachingYears")===""?null:Number(val("teachingYears"))},editionOrder:state.editionOrder,editions:state.editions,durationMs:Date.now()-state.startedAt,clientTimestamp:new Date().toISOString(),userAgent:navigator.userAgent}}
@@ -364,7 +595,9 @@ document.getElementById("sameResidentAddress").addEventListener("change",toggleP
 function payment(){const same=document.getElementById("sameResidentAddress").checked,t=val("bankType");return{action:"paymentDetails",studyId:CONFIG.studyId,participantId:state.participantId,name:val("payName"),nameKana:val("payNameKana"),affiliation:val("payAffiliation"),jobTitle:val("payJobTitle"),birthDate:val("birthDate"),phone:val("phone"),email:val("payEmail"),currentPostal:val("currentPostal"),currentAddress:val("currentAddress"),sameResidentAddress:same,residentPostal:same?"":val("residentPostal"),residentAddress:same?"":val("residentAddress"),bankType:t,bankName:t==="other"?val("bankName"):"ゆうちょ銀行",bankCode:t==="other"?val("bankCode"):"9900",branchName:t==="other"?val("branchName"):"",branchCode:t==="other"?val("branchCode"):"",yuchoSymbol:t==="yucho"?val("yuchoSymbol"):"",yuchoNumber:t==="yucho"?val("yuchoNumber"):"",accountNumber:t==="other"?val("accountNumber"):"",depositType:val("depositType"),accountHolder:val("accountHolder"),accountHolderKana:val("accountHolderKana"),clientTimestamp:new Date().toISOString()}}
 function calcAge(dobStr){const dob=new Date(dobStr);if(isNaN(dob))return null;const today=new Date();let age=today.getFullYear()-dob.getFullYear();const m=today.getMonth()-dob.getMonth();if(m<0||(m===0&&today.getDate()<dob.getDate()))age--;return age}
 function validatePayment(){for(const id of ["payName","payNameKana","birthDate","phone","payEmail","currentPostal","currentAddress","bankType","depositType","accountHolder","accountHolderKana"]){if(!val(id)){alert("支払い情報の必須項目を入力してください。");return false}}const age=calcAge(val("birthDate"));if(age===null||age<18){alert("本調査は18歳以上の方を対象としています。生年月日をご確認ください。");return false}if(!document.getElementById("payEmail").checkValidity()){alert("メールアドレスを確認してください。");return false}if(!document.getElementById("sameResidentAddress").checked&&(!val("residentPostal")||!val("residentAddress"))){alert("住民登録住所を入力するか、現住所と同じを選択してください。");return false}if(val("bankType")==="other"){if(["bankName","bankCode","branchName","branchCode","accountNumber"].some(id=>!val(id))){alert("金融機関・支店・口座情報を入力してください。");return false}if(!/^\d{4}$/.test(val("bankCode"))||!/^\d{3}$/.test(val("branchCode"))||!/^\d{7}$/.test(val("accountNumber"))){alert("金融機関コード4桁、支店コード3桁、口座番号7桁を確認してください。");return false}}if(val("bankType")==="yucho"&&(!val("yuchoSymbol")||!/^\d{8}$/.test(val("yuchoNumber")))){alert("ゆうちょの記号と8桁の番号を確認してください。");return false}return true}
-async function submitAll(){const st=document.getElementById("finalStatus"),btn=document.getElementById("next");if(!validatePayment())return;btn.disabled=true;btn.textContent="送信中…";const s=survey(),p=payment();try{await post(s);await post(p);localStorage.setItem("surveyBackup",JSON.stringify(s));st.className="status ok";st.innerHTML=`送信しました。ご協力ありがとうございました。<br>受付ID：${state.participantId}`;btn.textContent="送信完了"}catch(e){localStorage.setItem("unsentSurveyBackup",JSON.stringify(s));localStorage.setItem("unsentPaymentBackup",JSON.stringify(p));st.className="status error";st.textContent="送信できませんでした。通信環境を確認してください。";btn.disabled=false;btn.textContent="もう一度送信"}}
+async function submitAll(){const st=document.getElementById("finalStatus"),btn=document.getElementById("next");if(!validatePayment())return;btn.disabled=true;btn.textContent="送信中…";const s=survey(),p=payment();try{await post(s);await post(p);localStorage.setItem("surveyBackup",JSON.stringify(s));document.getElementById("doneParticipantId").textContent=state.participantId;document.body.classList.add("done");scrollTo({top:0,behavior:"instant"})}catch(e){localStorage.setItem("unsentSurveyBackup",JSON.stringify(s));localStorage.setItem("unsentPaymentBackup",JSON.stringify(p));st.className="status error";st.textContent="送信できませんでした。通信環境を確認してください。";btn.disabled=false;btn.textContent="もう一度送信"}}
 togglePaymentFields();show(0);
 </script>
 </body></html>
+ 
+
