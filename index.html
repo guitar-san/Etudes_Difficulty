@@ -65,9 +65,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-bo
 /* ---------- layout ---------- */
 main{max-width:1260px;margin:auto;padding:28px 18px 120px}
 .page{display:none}
-.page.active{display:block;animation:rise .35s ease both}
-@media(prefers-reduced-motion:reduce){.page.active{animation:none}}
-@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page.active{display:block}
 
 h1{font-family:var(--font-display);font-weight:800;font-size:27px;margin:0 0 8px;color:var(--ink);letter-spacing:.01em}
 h2{font-family:var(--font-display);font-weight:700;font-size:21px;margin:0 0 6px;color:var(--ink)}
@@ -356,7 +354,7 @@ renderStepper();
 /* ---- visual feedback for checkbox choices ---- */
 document.addEventListener("change",e=>{if(e.target.matches('.choice input[type="checkbox"]')){e.target.closest(".choice").classList.toggle("is-checked",e.target.checked)}});
 
-function show(n){document.querySelectorAll(".page").forEach((p,i)=>p.classList.toggle("active",i===n));state.page=n;if(n===6)syncPaymentDefaults();document.getElementById("back").style.display=n===0?"none":"";document.getElementById("next").textContent=n===6?"回答と支払い情報を送信":"次へ";updateStepper(n);scrollTo({top:0,behavior:"smooth"})}
+function show(n){document.querySelectorAll(".page").forEach((p,i)=>p.classList.toggle("active",i===n));state.page=n;if(n===6)syncPaymentDefaults();document.getElementById("back").style.display=n===0?"none":"";document.getElementById("next").textContent=n===6?"回答と支払い情報を送信":"次へ";updateStepper(n);scrollTo({top:0,behavior:"instant"})}
 document.getElementById("back").onclick=()=>show(Math.max(0,state.page-1));document.getElementById("next").onclick=async()=>{if(!validate())return;if(state.page>=2&&state.page<=5)capture(state.page-2);if(state.page<6)return show(state.page+1);await submitAll()};
 function survey(){return{action:"survey",studyId:CONFIG.studyId,participantId:state.participantId,consent:true,participant:{name:val("name"),email:val("email"),ageBand:val("ageBand"),roles:checks("#roles input"),level:val("level"),musicYears:Number(val("musicYears")),guitarYears:Number(val("guitarYears")),teachingYears:val("teachingYears")===""?null:Number(val("teachingYears"))},editionOrder:state.editionOrder,editions:state.editions,durationMs:Date.now()-state.startedAt,clientTimestamp:new Date().toISOString(),userAgent:navigator.userAgent}}
 async function post(x){await fetch(CONFIG.endpointUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(x)})}
